@@ -9,12 +9,13 @@ import (
 
 type transport struct {
 	underlyingTransport http.RoundTripper
-	developperToken     string
+	developerToken      string
 }
 
+// RoundTrip implements the net/http.RoundTripper interface.
 func (t *transport) RoundTrip(r *http.Request) (*http.Response, error) {
 	r2 := cloneRequest(r)
-	r2.Header.Add("developerToken", t.developperToken)
+	r2.Header.Add("developerToken", t.developerToken)
 	return t.underlyingTransport.RoundTrip(r2)
 }
 
@@ -30,8 +31,9 @@ func cloneRequest(r *http.Request) *http.Request {
 	return r2
 }
 
-func NewClient(ctx context.Context, source oauth2.TokenSource, developperToken string) *http.Client {
+// NewClient returns a new instance of http.Client.
+func NewClient(ctx context.Context, source oauth2.TokenSource, developerToken string) *http.Client {
 	c := oauth2.NewClient(ctx, source)
-	c.Transport = &transport{underlyingTransport: c.Transport, developperToken: developperToken}
+	c.Transport = &transport{underlyingTransport: c.Transport, developerToken: developerToken}
 	return c
 }

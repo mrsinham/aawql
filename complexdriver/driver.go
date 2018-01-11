@@ -3,16 +3,14 @@ package complexdriver
 import (
 	"database/sql"
 	"database/sql/driver"
+	"errors"
 	"io"
+	"net/url"
 	"time"
 
-	"net/url"
-
-	"errors"
-
-	cache "github.com/mrsinham/aawql/csvcache"
-	"github.com/mrsinham/aawql/db"
-	awql "github.com/mrsinham/aawql/driver"
+	cache "github.com/querian/aawql/csvcache"
+	"github.com/querian/aawql/db"
+	awql "github.com/querian/aawql/driver"
 )
 
 // AdvancedDriver implements all methods to pretend as a sql database driver.

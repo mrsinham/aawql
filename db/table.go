@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	awql "github.com/mrsinham/aawql/parser"
+	awql "github.com/querian/aawql/parser"
 )
 
 // Outputs format.

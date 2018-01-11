@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/mrsinham/aawql/db/internal/schema"
+	"github.com/querian/aawql/db/internal/schema"
+	awql "github.com/querian/aawql/parser"
 
-	awql "github.com/mrsinham/aawql/parser"
 	"gopkg.in/yaml.v2"
 )
 

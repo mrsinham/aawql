@@ -11,10 +11,11 @@ import (
 	"unicode/utf8"
 
 	"github.com/jinzhu/now"
-	cache "github.com/mrsinham/aawql/csvcache"
-	db "github.com/mrsinham/aawql/db"
-	awql "github.com/mrsinham/aawql/driver"
-	parser "github.com/mrsinham/aawql/parser"
+
+	cache "github.com/querian/aawql/csvcache"
+	db "github.com/querian/aawql/db"
+	awql "github.com/querian/aawql/driver"
+	parser "github.com/querian/aawql/parser"
 )
 
 // Stmt is a prepared statement.
@@ -567,21 +568,7 @@ func (s *SelectStmt) Query() (driver.Rows, error) {
 // Returns aggregated lines with maximum size of each column.
 // An error occurred if we fail to parse records.
 func aggregateData(stmt parser.SelectStmt, records [][]string) ([][]driver.Value, []int, error) {
-	// autoValue trims prefixes `auto` and returns a cleaned string.
-	// Also indicates with the second parameter, if it's a automatic value or not.
-	var autoValued = func(s string) (v string, ok bool) {
-		if ok = strings.HasPrefix(s, auto); !ok {
-			// Not prefixed by auto keyword.
-			v = s
-			return
-		}
-		// Trims the prefix `auto: `
-		if v = strings.TrimPrefix(s, autoValue); v == s {
-			// Removes only `auto` as prefix
-			v = strings.TrimPrefix(s, auto)
-		}
-		return
-	}
+	// TODO removes duplicates with Scan methods
 	// lenFloat64 returns the length of the float by calculating the number of digit + point.
 	var lenFloat64 = func(f Float64) (len int) {
 		switch {

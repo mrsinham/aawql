@@ -3,7 +3,9 @@ package complexdriver
 import (
 	"database/sql"
 	"database/sql/driver"
+	"fmt"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -51,6 +53,44 @@ func (n PercentNullFloat64) Value() (driver.Value, error) {
 	return v, nil
 }
 
+// Scan implements the driver Scanner interface.
+func (n *PercentNullFloat64) Scan(d interface{}) (err error) {
+	s, ok := d.(string)
+	if !ok {
+		return fmt.Errorf("unknow value %q", d)
+	}
+	if s == doubleDash {
+		n.NullFloat64.Float64 = 0.0
+		n.NullFloat64.Valid = false
+		n.Almost = false
+		n.Percent = false
+		return
+	}
+	if n.Percent = strings.HasSuffix(s, "%"); n.Percent {
+		s = strings.TrimSuffix(s, "%")
+	}
+	switch s {
+	case almost10:
+		// Sometimes, when it's less than 10, Google displays "< 10%".
+		n.NullFloat64.Float64 = 9.999
+		n.NullFloat64.Valid = true
+		n.Almost = true
+	case almost90:
+		// Or "> 90%" when it is the opposite.
+		n.NullFloat64.Float64 = 90.001
+		n.NullFloat64.Valid = true
+		n.Almost = true
+	default:
+		n.Almost = false
+		s = strings.Replace(s, ",", "", -1)
+		n.NullFloat64.Float64, err = strconv.ParseFloat(s, 64)
+		if err == nil {
+			n.NullFloat64.Valid = true
+		}
+	}
+	return
+}
+
 // AutoExcludedNullInt64 represents a int64 that may be null or defined as auto valuer.
 type AutoExcludedNullInt64 struct {
 	NullInt64 sql.NullInt64
@@ -76,6 +116,47 @@ func (n AutoExcludedNullInt64) Value() (driver.Value, error) {
 	v += strconv.FormatInt(n.NullInt64.Int64, 10)
 
 	return v, nil
+}
+
+// Scan implements the driver Scanner interface.
+func (n *AutoExcludedNullInt64) Scan(d interface{}) (err error) {
+	s, ok := d.(string)
+	if !ok {
+		return fmt.Errorf("unknow value %q", d)
+	}
+	if s == doubleDash {
+		return
+	}
+	if s == excluded {
+		// Voluntary null by scope.
+		n.Excluded = true
+		return
+	}
+	if s, n.Auto = autoValued(s); s == "" {
+		// Not set, null and automatic value.
+		return
+	}
+	n.NullInt64.Int64, err = strconv.ParseInt(s, 10, 64)
+	if err == nil {
+		n.NullInt64.Valid = true
+	}
+	return
+}
+
+// autoValue trims prefixes `auto` and returns a cleaned string.
+// Also indicates with the second parameter, if it's a automatic value or not.
+func autoValued(s string) (v string, ok bool) {
+	if ok = strings.HasPrefix(s, auto); !ok {
+		// Not prefixed by auto keyword.
+		v = s
+		return
+	}
+	// Trims the prefix `auto: `
+	if v = strings.TrimPrefix(s, autoValue); v == s {
+		// Removes only `auto` as prefix
+		v = strings.TrimPrefix(s, auto)
+	}
+	return
 }
 
 // Float64 represents a float64 that may be rounded by using its precision.

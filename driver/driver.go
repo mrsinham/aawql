@@ -10,7 +10,8 @@ import (
 	"sync"
 	"time"
 
-	awql "github.com/mrsinham/aawql/net/oauth2"
+	awql "github.com/querian/aawql/net/oauth2"
+
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
@@ -133,6 +134,7 @@ func unmarshal(dsn string) (conn *Conn, err error) {
 			Endpoint:     google.Endpoint,
 		}
 		c = awql.NewClient(ctx, conf.TokenSource(ctx, &oauth2.Token{RefreshToken: refreshToken}), developerToken)
+		c.Timeout = apiTimeout
 	}
 
 	conn = &Conn{}

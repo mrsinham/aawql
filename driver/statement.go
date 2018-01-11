@@ -137,7 +137,6 @@ func (s *Stmt) download(saveTo io.Writer) error {
 	if err != nil {
 		return err
 	}
-	s.Db.client.Timeout = apiTimeout
 
 	// @see https://developers.google.com/adwords/api/docs/guides/reporting#request_headers
 	rq.Header.Add("Content-Type", "application/x-www-form-urlencoded; param=value")
